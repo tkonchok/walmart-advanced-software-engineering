@@ -1,4 +1,5 @@
 import java.lang.reflect.Field;
+import java.util.NoSuchElementException;
 
 public class PowerOfTwoMaxHeapTest {
     public static void main(String[] args) throws Exception {
@@ -8,6 +9,26 @@ public class PowerOfTwoMaxHeapTest {
         assertHeapAfterInsertions(1, new int[] {-10, -1, -30, -5});
         assertHeapAfterInsertions(2, new int[] {7, 7, 7, 7});
         assertHeapAfterInsertions(1, new int[] {Integer.MIN_VALUE, 0, Integer.MAX_VALUE});
+
+        assertEmptyPopThrows(new PowerOfTwoMaxHeap(1));
+
+        assertPopOrder(
+                1,
+                new int[] {42},
+                new int[] {42});
+
+        assertPopOrder(
+                2,
+                new int[] {5, 5, 3, 5},
+                new int[] {5, 5, 5, 3});
+
+        int[] mixedValues = {3, -1, 7, 7, 2};
+        int[] expectedOrder = {7, 7, 3, 2, -1};
+
+        assertPopOrder(0, mixedValues, expectedOrder);
+        assertPopOrder(1, mixedValues, expectedOrder);
+        assertPopOrder(2, mixedValues, expectedOrder);
+        assertPopOrder(30, mixedValues, expectedOrder);
 
         int[] resizingValues = new int[17];
         for (int index = 0; index < resizingValues.length; index++) {
@@ -20,7 +41,10 @@ public class PowerOfTwoMaxHeapTest {
             throw new AssertionError(
                     "Expected capacity 32, but got " + resizedStorage.length);
         }
-        System.out.println("All insertion tests passed.");
+
+        testInterleavedOperations();
+
+        System.out.println("All heap tests passed.");
     }
 
     private static int[] readStorage(PowerOfTwoMaxHeap heap)
@@ -76,5 +100,66 @@ public class PowerOfTwoMaxHeapTest {
             }
         }
         return storage;
+    }
+
+    private static void assertPopOrder(
+            int exponent,
+            int[] inserted,
+            int[] expected) {
+        PowerOfTwoMaxHeap heap = new PowerOfTwoMaxHeap(exponent);
+
+        for (int value : inserted) {
+            heap.insert(value);
+        }
+
+        for (int index = 0; index < expected.length; index++) {
+            int actual = heap.popMax();
+
+            if (actual != expected[index]) {
+                throw new AssertionError(
+                        "Expected " + expected[index]
+                                + " at pop " + index
+                                + ", but got " + actual);
+            }
+        }
+
+        assertEmptyPopThrows(heap);
+    }
+
+    private static void assertEmptyPopThrows(
+            PowerOfTwoMaxHeap heap) {
+        try {
+            heap.popMax();
+            throw new AssertionError(
+                    "Expected NoSuchElementException");
+        } catch (NoSuchElementException expected) {
+            // Expected behavior.
+        }
+    }
+
+    private static void testInterleavedOperations() {
+        PowerOfTwoMaxHeap heap = new PowerOfTwoMaxHeap(1);
+
+        heap.insert(10);
+        heap.insert(4);
+        assertPopValue(heap, 10);
+
+        heap.insert(7);
+        heap.insert(20);
+        assertPopValue(heap, 20);
+        assertPopValue(heap, 7);
+        assertPopValue(heap, 4);
+
+        assertEmptyPopThrows(heap);
+    }
+
+    private static void assertPopValue(
+            PowerOfTwoMaxHeap heap, int expected) {
+        int actual = heap.popMax();
+
+        if (actual != expected) {
+            throw new AssertionError(
+                    "Expected pop " + expected + ", but got " + actual);
+        }
     }
 }

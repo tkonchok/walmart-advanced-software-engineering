@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 public class PowerOfTwoMaxHeap {
     private int[] storage;
@@ -37,5 +38,55 @@ public class PowerOfTwoMaxHeap {
             insertionIndex = parent;
         }
         storage[insertionIndex] = value;
+    }
+
+    public int popMax() {
+        if (size == 0) {
+            throw new NoSuchElementException("Heap is empty");
+        }
+        int maxValue = storage[0];
+        int lastValue = storage[size - 1];
+        size--;
+
+        if (size == 0) {
+            return maxValue;
+        }
+
+        int replacementIndex = 0;
+
+        while (true) {
+            long firstChild =
+                    (long) replacementIndex * branchingFactor + 1;
+
+            if (firstChild >= size) {
+                break;
+            }
+
+            long childLimit = Math.min(
+                    firstChild + branchingFactor,
+                    (long) size);
+
+            int largestChild = (int) firstChild;
+
+            for (long child = firstChild + 1;
+                 child < childLimit;
+                 child++) {
+                int childIndex = (int) child;
+
+                if (storage[childIndex] > storage[largestChild]) {
+                    largestChild = childIndex;
+                }
+            }
+
+            if (lastValue >= storage[largestChild]) {
+                break;
+            }
+
+            storage[replacementIndex] = storage[largestChild];
+            replacementIndex = largestChild;
+        }
+
+        storage[replacementIndex] = lastValue;
+        return maxValue;
     }
 }

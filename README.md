@@ -6,3 +6,4 @@ This repository contains my solutions and learning notes from the Walmart Advanc
 
 1. [Power-of-Two Max Heap](power-of-two-max-heap/README.md)
 2. [Software Architecture](software-architecture/README.md)
+3. [Relational Database Design](relational-database-design/README.md)
